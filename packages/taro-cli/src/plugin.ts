@@ -41,18 +41,17 @@ const PLUGIN_ROOT = 'plugin/'
 const DOC_ROOT = 'doc/'
 const NPM_DIR = 'npm/'
 const PLUGIN_JSON = 'plugin.json'
-const PLUGIN_MOCK_JSON = 'plugin-mock.json'
+// const PLUGIN_MOCK_JSON = 'plugin-mock.json'
 
 let isCopyingFiles = {}
 
 export async function build (appPath: string, { watch, platform }: IBuildConfig) {
   switch (platform) {
     case BUILD_TYPES.WEAPP:
-      buildWxPlugin(appPath, { watch })
+      buildPlugin(BUILD_TYPES.WEAPP, appPath, { watch });
       break
     case BUILD_TYPES.ALIPAY:
-      await buildWeapp(appPath, { watch, adapter: BUILD_TYPES.ALIPAY })
-      buildAlipayPlugin()
+      buildPlugin(BUILD_TYPES.ALIPAY, appPath, { watch });
       break
     default:
       console.log(chalk.red('输入插件类型错误，目前只支持 weapp/alipay 插件类型'))
@@ -316,11 +315,11 @@ function isWxPluginPage (pages, filePath) {
   return pages.findIndex(page => filePath.includes(path.join(page))) >= 0
 }
 
-async function buildWxPlugin (appPath, { watch }) {
+async function buildPlugin (buildType, appPath, { watch }) {
   const {
     sourceDir,
     outputDir
-  } = setBuildData(appPath, BUILD_TYPES.WEAPP)
+  } = setBuildData(appPath, buildType)
   const pluginDir = path.join(sourceDir, PLUGIN_ROOT)
   const pluginPath = path.join(appPath, PLUGIN_ROOT)
   const docDir = path.join(pluginDir, DOC_ROOT)
@@ -331,7 +330,7 @@ async function buildWxPlugin (appPath, { watch }) {
   fs.existsSync(pluginPath) && Util.emptyDirectory(pluginPath)
   fs.existsSync(docPath) && Util.emptyDirectory(docPath)
   // 编译调试项目
-  await buildWeapp(appPath, { adapter: BUILD_TYPES.WEAPP, envHasBeenSet: true })
+  await buildWeapp(appPath, { adapter: buildType, envHasBeenSet: true })
 
   const pluginJsonPath = path.join(pluginDir, PLUGIN_JSON)
   if (!fs.existsSync(pluginDir) || !fs.existsSync(pluginJsonPath)) {
@@ -407,18 +406,18 @@ async function buildWxPlugin (appPath, { watch }) {
   watch && wxPluginWatchFiles()
 }
 
-function buildAlipayPlugin () {
-  const {
-    sourceDir,
-    outputDir
-  } = getBuildData()
-  const pluginJson = path.join(sourceDir, PLUGIN_JSON)
-  const pluginMockJson = path.join(sourceDir, PLUGIN_MOCK_JSON)
-
-  if (fs.existsSync(pluginJson)) {
-    fs.copyFileSync(pluginJson, path.join(outputDir, PLUGIN_JSON))
-  }
-  if (fs.existsSync(pluginMockJson)) {
-    fs.copyFileSync(pluginMockJson, path.join(outputDir, PLUGIN_MOCK_JSON))
-  }
-}
+// function buildAlipayPlugin () {
+//   const {
+//     sourceDir,
+//     outputDir
+//   } = getBuildData()
+//   const pluginJson = path.join(sourceDir, PLUGIN_JSON)
+//   const pluginMockJson = path.join(sourceDir, PLUGIN_MOCK_JSON)
+//
+//   if (fs.existsSync(pluginJson)) {
+//     fs.copyFileSync(pluginJson, path.join(outputDir, PLUGIN_JSON))
+//   }
+//   if (fs.existsSync(pluginMockJson)) {
+//     fs.copyFileSync(pluginMockJson, path.join(outputDir, PLUGIN_MOCK_JSON))
+//   }
+// }

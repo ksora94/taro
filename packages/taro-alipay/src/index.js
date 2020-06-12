@@ -45,6 +45,8 @@ import initNativeApi from './native-api'
 import propsManager from './propsManager'
 import { getElementById, genCompid } from './util'
 
+import getApp from './getApp'
+
 if (!my.propsManager) my.propsManager = propsManager
 
 export const Taro = {
@@ -88,7 +90,8 @@ export const Taro = {
   useContext,
   createContext,
   memo,
-  shallowEqual
+  shallowEqual,
+  getApp
 }
 
 export default Taro

@@ -7,6 +7,7 @@ import {
 } from '@tarojs/taro'
 import { cacheDataSet, cacheDataGet } from './data-cache'
 import { queryToJson, getUniqueKey } from './util'
+import getApp from './getApp'
 
 const apiDiff = {
   showActionSheet: {
