@@ -41,6 +41,7 @@ const PLUGIN_ROOT = 'plugin/'
 const DOC_ROOT = 'doc/'
 const NPM_DIR = 'npm/'
 const PLUGIN_JSON = 'plugin.json'
+const ALIPAY_PLUGIN_CONFIG = 'mini.project.json'
 // const PLUGIN_MOCK_JSON = 'plugin-mock.json'
 
 let isCopyingFiles = {}
@@ -66,7 +67,7 @@ function compilePluginJson (pluginJson, pluginPath) {
   fs.writeJSONSync(pluginPath, pluginJson)
 }
 
-function wxPluginWatchFiles () {
+function wxPluginWatchFiles (buildType, pageDir) {
   console.log()
   console.log(chalk.gray('监听文件修改中...'))
   console.log()
@@ -108,7 +109,7 @@ function wxPluginWatchFiles () {
       } else if (filePath.includes(pluginDir)) {
         outputFilePath = filePath.replace(pluginDir, pluginPath)
       } else {
-        outputFilePath = filePath.replace(sourceDir, outputDir)
+        outputFilePath = filePath.replace(sourceDir, pageDir)
       }
 
       const extname = path.extname(filePath)
@@ -288,22 +289,22 @@ function wxPluginWatchFiles () {
         })
         await Promise.all(ioPromises)
 
-        await Promise.all(names.map(async from => {
-          from = path.join(from)
-          if (fs.existsSync(from) && fs.statSync(from).isFile()) {
-            const to = from.replace(outputDir, appPath)
-            fs.ensureDirSync(path.dirname(to))
-            await fs.copyFile(from, to)
-          }
-        }))
-        const tempPluginPath = path.join(outputDir, PLUGIN_ROOT)
-        Util.emptyDirectory(tempPluginPath)
-        fs.rmdirSync(tempPluginPath)
+        // await Promise.all(names.map(async from => {
+        //   from = path.join(from)
+        //   if (fs.existsSync(from) && fs.statSync(from).isFile()) {
+        //     const to = from.replace(outputDir, appPath)
+        //     fs.ensureDirSync(path.dirname(to))
+        //     await fs.copyFile(from, to)
+        //   }
+        // }))
+        // const tempPluginPath = path.join(outputDir, PLUGIN_ROOT)
+        // Util.emptyDirectory(tempPluginPath)
+        // fs.rmdirSync(tempPluginPath)
       }
       // 迁移 npm 到 plugin 目录
       Util.emptyDirectory(path.join(pluginPath, NPM_DIR))
       // fs.rmdirSync(tempPluginPath)
-      await fs.copy(path.join(outputDir, NPM_DIR), path.join(pluginPath, NPM_DIR))
+      await fs.copy(path.join(pageDir, NPM_DIR), path.join(pluginPath, NPM_DIR))
 
       initCompileScripts()
       initCompileStyles()
@@ -403,7 +404,35 @@ async function buildPlugin (buildType, appPath, { watch }) {
   })
   await Promise.all(ioPromises)
 
-  watch && wxPluginWatchFiles()
+  // 支付宝插件目录配置
+  if (buildType === BUILD_TYPES.ALIPAY) {
+    const configFilePath = path.join(appPath, ALIPAY_PLUGIN_CONFIG)
+
+    if (!fs.existsSync(configFilePath)) {
+      return console.log(chalk.red('缺少 src/mini.project.json!'))
+    }
+    const config = await fs.readJSON(configFilePath);
+
+    if (!config || !config.miniprogramRoot) {
+      return console.log(chalk.red('src/mini.project.json 格式错误!'))
+    }
+
+    const pageFiles = glob.sync(`${outputDir}/!(${config.miniprogramRoot})`)
+    const pageDir = path.join(outputDir, config.miniprogramRoot)
+
+    await fs.ensureDir(pageDir)
+
+    pageFiles.map(async file =>
+      await fs.move(file, path.join(pageDir, path.basename(file)))
+    )
+
+    await fs.move(pluginPath, path.join(outputDir, PLUGIN_ROOT))
+    await fs.copy(configFilePath, path.join(outputDir, ALIPAY_PLUGIN_CONFIG))
+
+    watch && wxPluginWatchFiles(buildType, pageDir)
+  } else {
+    watch && wxPluginWatchFiles(buildType, outputDir)
+  }
 }
 
 // function buildAlipayPlugin () {
