@@ -7,14 +7,18 @@ export default (ctx) => {
     async fn ({ config }) {
       const { appPath, nodeModulesPath, outputPath } = ctx.paths
       const { npm, emptyDirectory } = ctx.helper
-      emptyDirectory(outputPath)
+      const isBuildPlugin = config.isBuildPlugin || false
+
+      if (!('needClearOutput' in config) || config.needClearOutput) {
+        emptyDirectory(outputPath)
+      }
 
       // 准备 miniRunner 参数
       const miniRunnerOpts = {
         ...config,
         nodeModulesPath,
+        isBuildPlugin,
         buildAdapter: config.platform,
-        isBuildPlugin: false,
         globalObject: 'my',
         fileType: {
           templ: '.axml',

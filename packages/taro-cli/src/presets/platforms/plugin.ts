@@ -13,8 +13,7 @@ export default (ctx) => {
       const { emptyDirectory, chalk, fs, PLATFORMS } = ctx.helper
       const { WEAPP, ALIPAY } = PLATFORMS
 
-      const PLUGIN_JSON = 'plugin.json'
-      const PLUGIN_MOCK_JSON = 'plugin-mock.json'
+      const PLUGIN_JSON = 'mini.project.json'
 
       const typeMap = {
         [WEAPP]: '微信',
@@ -60,26 +59,51 @@ export default (ctx) => {
       }
 
       async function buildAlipayPlugin () {
+        const pluginJsonPath = path.join(sourcePath, PLUGIN_JSON);
+        let pluginConfig = {
+          miniprogramRoot: 'miniprogram',
+          pluginRoot: 'plugin',
+          compileType: 'plugin'
+        };
+
+        if (fs.existsSync(pluginJsonPath)) {
+          pluginConfig = fs.readJSONSync(pluginJsonPath);
+          if (!pluginConfig.miniprogramRoot || !pluginConfig.pluginRoot) {
+            console.log(chalk.red(`${PLUGIN_JSON}文件格式出错`));
+          }
+        } else {
+          console.log(chalk.green(`源代码目录下缺少${PLUGIN_JSON}文件，自动生成${PLUGIN_JSON}！`));
+          fs.writeJSONSync(path.join(config.outputRoot, PLUGIN_JSON), pluginConfig);
+        }
+
         await ctx.applyPlugins({
           name: 'build',
           opts: {
             config: {
               ...config,
+              isBuildPlugin: true,
               isWatch,
-              platform: 'alipay'
+              outputRoot: config.outputRoot,
+              platform: 'alipay',
+              needClearOutput: false
             },
             platform: 'alipay'
           }
         })
-        const pluginJson = path.join(sourcePath, PLUGIN_JSON)
-        const pluginMockJson = path.join(sourcePath, PLUGIN_MOCK_JSON)
-
-        if (fs.existsSync(pluginJson)) {
-          fs.copyFileSync(pluginJson, path.join(outputPath, PLUGIN_JSON))
-        }
-        if (fs.existsSync(pluginMockJson)) {
-          fs.copyFileSync(pluginMockJson, path.join(outputPath, PLUGIN_MOCK_JSON))
-        }
+        await ctx.applyPlugins({
+          name: 'build',
+          opts: {
+            config: {
+              ...config,
+              isBuildPlugin: false,
+              isWatch,
+              outputRoot: `${config.outputRoot}/${pluginConfig.miniprogramRoot}`,
+              platform: 'alipay',
+              needClearOutput: false
+            },
+            platform: 'alipay'
+          }
+        })
       }
 
       switch (plugin) {
