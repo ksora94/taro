@@ -1,6 +1,6 @@
 import { getCurrentPageUrl } from '@tarojs/utils'
 import { commitAttachRef, detachAllRef, Current, eventCenter } from '@tarojs/taro'
-import { isEmptyObject, isFunction, isArray } from './util'
+import { isEmptyObject, isFunction, isArray, getApp } from './util'
 import { mountComponent, updateComponent } from './lifecycle'
 import { cacheDataSet, cacheDataGet, cacheDataHas } from './data-cache'
 
@@ -74,6 +74,7 @@ function processEvent (eventHandlerName, obj) {
     const isAnonymousFn = eventHandlerName.indexOf(anonymousFnNamePreffix) > -1
     let realArgs = []
     let datasetArgs = []
+    // eslint-disable-next-line no-unused-vars
     let isScopeBinded = false
     // 解析从dataset中传过来的参数
     const dataset = event.currentTarget.dataset || {}
@@ -351,10 +352,10 @@ function createComponent (ComponentClass, isPage) {
           my.propsManager.observers[compid] = {
             component: this.$component,
             ComponentClass: ComponentClass
-          };
-          var nextProps = filterProps(ComponentClass.defaultProps, my.propsManager.map[compid], this.$component.props);
-          this.$component.props = nextProps;
-          updateComponent(this.$component);
+          }
+          var nextProps = filterProps(ComponentClass.defaultProps, my.propsManager.map[compid], this.$component.props)
+          this.$component.props = nextProps
+          updateComponent(this.$component)
         }
       },
 

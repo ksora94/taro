@@ -277,9 +277,9 @@ function genId () {
 
 if (!my.compIdsMapper) {
   try {
-    my.compIdsMapper = new Map();
+    my.compIdsMapper = new Map()
   } catch (error) {
-    my.compIdsMapper = new SimpleMap();
+    my.compIdsMapper = new SimpleMap()
   }
 }
 
@@ -302,3 +302,10 @@ let prefix = 0
 export function genCompPrefix () {
   return String(prefix++)
 }
+
+const dummyApp = {}
+function _getApp () {
+  return dummyApp
+}
+// eslint-disable-next-line no-use-before-define
+export const getApp = getApp || _getApp
