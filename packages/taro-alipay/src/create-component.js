@@ -1,6 +1,6 @@
 import { getCurrentPageUrl } from '@tarojs/utils'
 import { commitAttachRef, detachAllRef, Current, eventCenter } from '@tarojs/taro'
-import { isEmptyObject, isFunction, isArray, getApp } from './util'
+import { isEmptyObject, isFunction, isArray, getPluginApp } from './util'
 import { mountComponent, updateComponent } from './lifecycle'
 import { cacheDataSet, cacheDataGet, cacheDataHas } from './data-cache'
 
@@ -255,7 +255,13 @@ function createComponent (ComponentClass, isPage) {
         }
 
         // merge App router params
-        const app = getApp()
+        let app
+        try {
+          app = getApp()
+        } catch (e) {
+          app = getPluginApp()
+        }
+
         if (
           app.$router &&
           app.$router.params &&

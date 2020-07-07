@@ -6,7 +6,7 @@ import {
   Link
 } from '@tarojs/taro'
 import { cacheDataSet, cacheDataGet } from './data-cache'
-import { queryToJson, getUniqueKey, getApp } from './util'
+import { queryToJson, getUniqueKey, getPluginApp } from './util'
 
 const apiDiff = {
   showActionSheet: {
@@ -477,7 +477,11 @@ export default function initNativeApi (taro) {
   taro.addInterceptor = link.addInterceptor.bind(link)
   taro.cleanInterceptors = link.cleanInterceptors.bind(link)
   taro.getCurrentPages = getCurrentPages
-  taro.getApp = getApp
+  try {
+    taro.getApp = getApp
+  } catch (e) {
+    taro.getApp = getPluginApp
+  }
   taro.initPxTransform = initPxTransform.bind(taro)
   taro.pxTransform = pxTransform.bind(taro)
 }

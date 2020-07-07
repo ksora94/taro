@@ -304,8 +304,6 @@ export function genCompPrefix () {
 }
 
 const dummyApp = {}
-function _getApp () {
+export function getPluginApp () {
   return dummyApp
 }
-// eslint-disable-next-line no-use-before-define
-export const getApp = getApp || _getApp
