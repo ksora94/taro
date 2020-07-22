@@ -20,6 +20,7 @@ export default (ctx) => {
         isBuildPlugin,
         buildAdapter: config.platform,
         globalObject: 'my',
+        env: {...config.env, TARO_PLUGIN: isBuildPlugin ? 'true' : 'false'},
         fileType: {
           templ: '.axml',
           style: '.acss',

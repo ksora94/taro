@@ -255,13 +255,7 @@ function createComponent (ComponentClass, isPage) {
         }
 
         // merge App router params
-        let app
-        try {
-          app = getApp()
-        } catch (e) {
-          app = getPluginApp()
-        }
-
+        const app = (process.env.TARO_PLUGIN ? getPluginApp : getApp)()
         if (
           app.$router &&
           app.$router.params &&
