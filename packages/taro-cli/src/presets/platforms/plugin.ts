@@ -70,11 +70,12 @@ export default (ctx) => {
           pluginConfig = fs.readJSONSync(pluginJsonPath);
           if (!pluginConfig.miniprogramRoot || !pluginConfig.pluginRoot) {
             console.log(chalk.red(`${PLUGIN_JSON}文件格式出错`));
+            return;
           }
         } else {
           console.log(chalk.green(`源代码目录下缺少${PLUGIN_JSON}文件，自动生成${PLUGIN_JSON}！`));
-          fs.writeJSONSync(path.join(config.outputRoot, PLUGIN_JSON), pluginConfig);
         }
+        fs.writeJSONSync(path.join(config.outputRoot, PLUGIN_JSON), pluginConfig);
 
         await ctx.applyPlugins({
           name: 'build',
