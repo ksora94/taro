@@ -75,6 +75,7 @@ export default (ctx) => {
         } else {
           console.log(chalk.green(`源代码目录下缺少${PLUGIN_JSON}文件，自动生成${PLUGIN_JSON}！`));
         }
+        fs.ensureDirSync(config.outputRoot);
         fs.writeJSONSync(path.join(config.outputRoot, PLUGIN_JSON), pluginConfig);
 
         await ctx.applyPlugins({
